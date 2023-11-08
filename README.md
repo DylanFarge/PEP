@@ -8,6 +8,7 @@ python3 app.py
 1. ~~Add ability to toggle option for students to rate themselves.~~ &check;
 2. Add an Excel spreadsheet file as an output to both check internal calculations and for users to see how the calculations are done. This file should take on the familiar format of manually calculating the grades as done in the past.
 3. Start/Expand/Finish README
+4. Add an Excel spreadsheet file as an output for all worded reviews in order to easily check for group member names and ratings.
 ---
 ## README TODO:
 1. How to use PRP software.
