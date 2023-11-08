@@ -1,6 +1,8 @@
+import os, sys
 import pandas as pd
 import numpy as np
-import os, sys
+from src.output_excel import ExcelOutput
+# from output_excel import ExcelOutput
 
 open_log_file : bool = True
 outdir : str = "."
@@ -31,10 +33,10 @@ def out(message : str, type="string") :
     with open(f"{outdir}/log.txt", write) as f:
         if type == "string":
             f.write(message+"\n")
-            print(message)
+            # print(message)
         else:
             f.write(message.to_string()+"\n")
-            print(message.to_string())
+            # print(message.to_string())
 
 def get_data(path : str) -> pd.DataFrame:
     '''
@@ -126,7 +128,7 @@ def try_to_correct(member : str, group_members : list) -> str:
     return str(correction)
     
     
-def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, correct_ids : bool) -> list[pd.DataFrame, pd.DataFrame]:
+def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, settings : dict) -> list[pd.DataFrame, pd.DataFrame]:
     '''
     This method processes every student. This is where the actual calculations are done.
     
@@ -141,34 +143,45 @@ def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, 
     lookup : dict
         The lookup table to convert the ratings to numbers
         
-    correct_ids : bool
-        Whether or not to try and correct the ids of the students
-    
+    settings : dict
+        The settings used to calculate the ratings
+        
     Returns
     -------
     Both the student mean and the resulting group dataframe
     '''
+    global excel
+    correct_ids = settings["correct_ids"]
     student_mean = pd.DataFrame(np.zeros((1, len(groups))), columns=groups["ID number"].to_list())
-    
     for entry in data.iterrows():
         student = str(entry[1]["ID number"])
+        if student == "25081551":
+            ...
         group = groups[groups["ID number"] == student]
         group_size = int(group["Size"].values[0])
+        group_size = group_size if settings["self_rate"] else group_size - 1
         group = group["Group"].values[0]
         
-        out("---------- Processing "+str(entry[1]["ID number"])+" "+entry[1]["Surname"]+" ----------")
+        out("---------- Processing "+student+" "+entry[1]["Surname"]+" ----------")
         i = 0
         pending_scores = []
         pending_members = []
         duplicate = False
+        j = 0 # useful if self_rate is False
         while i < group_size:
             
             try:
                     
-                member = str(entry[1]["Response "+str(3*i+1)]).split(".")[0]
-                rating = str(entry[1]["Response " + str(3*i+2)])
+                member = str(entry[1]["Response "+str(3*(i+j)+1)]).split(".")[0]
+                rating = str(entry[1]["Response " + str(3*(i+j)+2)])
                 member_group = groups[groups["ID number"] == member]["Group"]
                 
+                if member == student and not settings["self_rate"] and member not in pending_members:
+                    pending_members.append(member)
+                    out("\t"+ member+ " -> IGNORING SELF RATING")
+                    j += 1
+                    continue
+
                 if member_group.empty:
                     raise ValueError("Could not find member: "+member+" in provided groups file.")
                 elif member_group.values[0] != group:
@@ -177,14 +190,17 @@ def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, 
                     duplicate = True
                     raise ValueError("Member: "+member+" has been rated twice by student: "+student)
                 
+
                 student_mean[member] += lookup[rating] / group_size
                 pending_scores.append(lookup[rating] / group_size)
                 pending_members.append(member)
                 
                 out("\t"+ member+ " -> "+ rating)
+                excel.add_rating(student, member, rating)
                 i += 1
                 
-            except:
+            except Exception as e:
+                print(e)
                 out("********** ERROR IN ENTRY OF "+entry[1]["First name"]+" **********")
                 out("Mistake detected in following input:")
                 out("Member ID : "+ member)
@@ -205,7 +221,7 @@ def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, 
                         i = group_size
                    
                     else:
-                        entry[1]["Response "+str(3*i+1)] = correction
+                        entry[1]["Response "+str(3*(i+j)+1)] = correction
                         
                 else:
                     groups.loc[groups["ID number"] == student, "Flag"] = True
@@ -238,7 +254,8 @@ def compile_results(groups : pd.DataFrame, factors : list, create : bool):
     -------
     None
     '''
-    global outdir
+    global outdir, excel
+    excel.save(groups, outdir+"/results.xlsx")
     results = pd.DataFrame({
         "First name": groups["First name"].tolist(),
         "Surname": groups["Surname"].tolist(),
@@ -279,7 +296,7 @@ def compile_results(groups : pd.DataFrame, factors : list, create : bool):
             f.write(df.to_csv(index=False))
 
     
-def mark(args: str(list), settings: dict = {
+def mark(args: str(list), self_rate: bool = True,settings: dict = {
     "capped_mark": 1.1,
     "correct_ids": True,
     "create_file": True,
@@ -303,6 +320,9 @@ def mark(args: str(list), settings: dict = {
         str1 : The path to the group file
         str2 : The path to the peer review meta-data intended to be marked.
         str3 : The path to the output directory
+
+    self_rate(optional) : boolean
+        If True, students can rate themselves. Default is True.
         
     settings(optional) : dict
         capped_mark(float) : number used to set a cap to how high the final score can be
@@ -326,11 +346,13 @@ def mark(args: str(list), settings: dict = {
     ----------
     None
     '''
-    global outdir
+    global outdir, excel
     outdir = args[2]
     groups = get_groups(args[0])
     data = get_data(args[1])  
-    student_mean, groups = process_students(groups, data, lookup, settings["correct_ids"])
+    excel = ExcelOutput(groups, self_rate, lookup)
+    settings["self_rate"] = self_rate
+    student_mean, groups = process_students(groups, data, lookup, settings)
     
     # Flag students that did not complete quiz while belonging to a group
     for i in groups["ID number"].tolist():
@@ -374,11 +396,11 @@ def mark(args: str(list), settings: dict = {
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        mark(sys.argv[1:])
+        mark(sys.argv[1:], self_rate=True)
     else:
         paths = [
-            "../groups.xlsx",
-            "../peer_reviews/corrected/p4.csv"
-            "."
+            "files/groups.xlsx",
+            "files/p1.csv",
+            "output"
         ]
-        mark(paths)
+        mark(paths, self_rate=False)

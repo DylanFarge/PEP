@@ -2,10 +2,10 @@
 For now, run GUI using:
 ```bash
 pip install -r src/dependencies.txt
-python3 gui_vx.x.py
+python3 app.py
 ```
 ## Features TODO:
-1. Add ability to toggle option for students to rate themselves.
+1. ~~Add ability to toggle option for students to rate themselves.~~ &check;
 2. Add an Excel spreadsheet file as an output to both check internal calculations and for users to see how the calculations are done. This file should take on the familiar format of manually calculating the grades as done in the past.
 3. Start/Expand/Finish README
 ---
