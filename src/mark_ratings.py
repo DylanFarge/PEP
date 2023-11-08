@@ -1,8 +1,8 @@
 import os, sys
 import pandas as pd
 import numpy as np
-from src.output_excel import ExcelOutput
-# from output_excel import ExcelOutput
+# from src.output_excel import ExcelOutput
+from output_excel import ExcelOutput
 
 open_log_file : bool = True
 outdir : str = "."
