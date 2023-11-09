@@ -1,8 +1,8 @@
 import os, sys
 import pandas as pd
 import numpy as np
-# from src.output_excel import ExcelOutput
-from output_excel import ExcelOutput
+from src.output_excel import ExcelOutput
+# from output_excel import ExcelOutput
 
 open_log_file : bool = True
 outdir : str = "."
@@ -209,7 +209,14 @@ def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, 
                     out("***** Duplicate rating *****")
                 out("****************************************************")
                 
-                if correct_ids and not duplicate:
+                if rating == "nan" or rating == "" or rating == " " or rating == "-":
+                    groups.loc[groups["ID number"] == student, "Flag"] = True
+                    out("Student FLAGGED")
+                    for already in range(len(pending_scores)):
+                        student_mean[pending_members[already]] -= pending_scores[already]
+                    i = group_size
+
+                elif correct_ids and not duplicate:
                     correction = try_to_correct(member, groups[groups["Group"] == group]["ID number"].tolist())
                     
                     if correction is None:
@@ -350,7 +357,7 @@ def mark(args: str(list), self_rate: bool = True,settings: dict = {
     outdir = args[2]
     groups = get_groups(args[0])
     data = get_data(args[1])  
-    excel = ExcelOutput(groups, self_rate, lookup)
+    excel = ExcelOutput(groups, self_rate, lookup, settings["capped_mark"])
     settings["self_rate"] = self_rate
     student_mean, groups = process_students(groups, data, lookup, settings)
     

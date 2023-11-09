@@ -2,7 +2,8 @@ import pandas as pd
 import openpyxl as xl
 
 class ExcelOutput:
-    def __init__(self, groups, self_rate, lookup):
+    def __init__(self, groups, self_rate, lookup, capped_mark):
+        self.capped_mark = capped_mark
         self.lookup = lookup        
         self.self_rate = self_rate
         self.df = pd.DataFrame(columns=["Ratings","Group"], index=groups["ID number"].tolist())
@@ -62,6 +63,10 @@ class ExcelOutput:
                         st.cell(row=i+3, column=(j*2)+2, value=self.df.loc[m]["Ratings"][n]).alignment = xl.styles.Alignment(horizontal="right")
                         st.cell(row=i+3, column=(j*2)+3, value=lookup_func(cell))
 
+            # Heading
+            st.cell(row=1, column=2, value="Group members BEING rated").alignment = xl.styles.Alignment(horizontal="center")
+            st.merge_cells(start_row=1, start_column=2, end_row=1, end_column=(len(members)*2)+1)
+
             # Calculate student averages
             for k in range(len(members)):
                 col = xl.utils.get_column_letter((k*2)+3)
@@ -76,13 +81,20 @@ class ExcelOutput:
             st.merge_cells(start_row=i+5, start_column=(k*2)+5, end_row=i+5, end_column=(k*2)+6)
             st.merge_cells(start_row=i+6, start_column=(k*2)+5, end_row=i+6, end_column=(k*2)+6)
 
+            # Stating Capped Scaling Factor
+            st.cell(row=2, column=(k*2)+8, value="Capped Scaling Factor").alignment = xl.styles.Alignment(horizontal="center")
+            st.merge_cells(start_row=2, start_column=(k*2)+8, end_row=2, end_column=(k*2)+10)
+            st.cell(row=3, column=(k*2)+8, value=float(self.capped_mark)).alignment = xl.styles.Alignment(horizontal="center")
+            cap_cell = xl.utils.get_column_letter((k*2)+8) + str(3)
+            st.merge_cells(start_row=3, start_column=(k*2)+8, end_row=3, end_column=(k*2)+10)
+
             # Calculate Scaling Factors
             st.cell(row=2, column=(k*2)+5, value="Scaling Factors").alignment = xl.styles.Alignment(horizontal="center")
             st.merge_cells(start_row=2, start_column=(k*2)+5, end_row=2, end_column=(k*2)+6)
             cell_team = xl.utils.get_column_letter((k*2)+5) + str(i+6)
             for m in range(len(members)):
                 cell_student = xl.utils.get_column_letter((m*2)+2) + str(i+6)
-                st.cell(row=(m+3), column=(k*2)+5, value="="+cell_student+"/"+cell_team).alignment = xl.styles.Alignment(horizontal="center")
+                st.cell(row=(m+3), column=(k*2)+5, value="=MIN("+cell_student+"/"+cell_team+","+cap_cell+")").alignment = xl.styles.Alignment(horizontal="center")
                 st.merge_cells(start_row=(m+3), start_column=(k*2)+5, end_row=(m+3), end_column=(k*2)+6)
                 
         # remove default sheet
