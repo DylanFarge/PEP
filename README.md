@@ -1,6 +1,9 @@
 # Peer Review Processor (PRP)
 For now, run GUI using:
 ```bash
+sudo apt-get update
+sudo apt install python3-pip
+sudo apt-get install python3-tk
 pip install -r src/dependencies.txt
 python3 app.py
 ```
