@@ -176,4 +176,12 @@ class Application():
         Application.app.mainloop()
 
 if __name__ == "__main__":
-    Application.run()
+    import sys
+    from src.mark_ratings import run_cmd
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "cmd":
+            run_cmd()
+        else:
+            print("Unknown command:", sys.argv[1])
+    else:
+        Application.run()

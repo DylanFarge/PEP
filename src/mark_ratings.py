@@ -155,14 +155,12 @@ def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, 
     student_mean = pd.DataFrame(np.zeros((1, len(groups))), columns=groups["ID number"].to_list())
     for entry in data.iterrows():
         student = str(entry[1]["ID number"])
-        if student == "25081551":
-            ...
         group = groups[groups["ID number"] == student]
         group_size = int(group["Size"].values[0])
         group_size = group_size if settings["self_rate"] else group_size - 1
         group = group["Group"].values[0]
         
-        out("---------- Processing "+student+" "+entry[1]["Surname"]+" ----------")
+        out("---------- Processing "+student+" "+entry[1]["Last name"]+" ----------")
         i = 0
         pending_scores = []
         pending_members = []
@@ -174,6 +172,7 @@ def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, 
                     
                 member = str(entry[1]["Response "+str(3*(i+j)+1)]).split(".")[0]
                 rating = str(entry[1]["Response " + str(3*(i+j)+2)])
+                comment = str(entry[1]["Response " + str(3*(i+j)+3)])
                 member_group = groups[groups["ID number"] == member]["Group"]
                 
                 if member == student and not settings["self_rate"] and member not in pending_members:
@@ -197,6 +196,7 @@ def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, 
                 
                 out("\t"+ member+ " -> "+ rating)
                 excel.add_rating(student, member, rating)
+                excel.add_comment(student, member, comment)
                 i += 1
                 
             except Exception as e:
@@ -265,12 +265,14 @@ def compile_results(groups : pd.DataFrame, factors : list, create : bool):
     excel.save(groups, outdir+"/results.xlsx")
     results = pd.DataFrame({
         "First name": groups["First name"].tolist(),
-        "Surname": groups["Surname"].tolist(),
+        "Last name": groups["Last name"].tolist(),
         "ID number": groups["ID number"].tolist(),
         "Group": groups["Group"].tolist(),    
         "Scaling factor": factors,
         "Flagged": ["" if i == False else "FLAGGED" for i in groups["Flag"].tolist()],
     })
+    
+    errors = results[ results["Scaling factor"] == -1]
     results = results[ results["Scaling factor"] != -1]    
     results.sort_values(by=["ID number"], inplace=True, ignore_index=True)
     
@@ -282,22 +284,15 @@ def compile_results(groups : pd.DataFrame, factors : list, create : bool):
     out("--------------------------------------------")
     out(results[results["Flagged"] == "FLAGGED"], type="df")
     out("--------------------------------------------")
+    out("Divide by zero errors: (Did not include in final scores)")
+    out(errors, type="df")
+    out("--------------------------------------------")
     
     if create:
         if os.path.exists(f"{outdir}/scaling_factors.csv"):
-            file = pd.read_csv(f"{outdir}/scaling_factors.csv")
-            cols = file.columns.tolist()
-            count = 0
-            for col in cols:
-                if "Scaling factor" in col:
-                    count += 1
-            newdf = pd.DataFrame(columns=["Scaling factor "+str(count+1),"Flagged "+str(count+1)])
-            newdf["Scaling factor "+str(count+1)] = results["Scaling factor"]
-            newdf["Flagged "+str(count+1)] = results["Flagged"]
-            df = pd.concat([file, newdf], axis=1, ignore_index=False)
-        else:
-            df = results
-            df.rename(columns={"Scaling factor": "Scaling factor 1", "Flagged": "Flagged 1"}, inplace=True)
+            os.remove(f"{outdir}/scaling_factors.csv")
+        df = results
+        df.rename(columns={"Scaling factor": "Scaling factor 1", "Flagged": "Flagged 1"}, inplace=True)
                 
         with open(f"{outdir}/scaling_factors.csv", "w") as f:
             f.write(df.to_csv(index=False))
@@ -360,7 +355,7 @@ def mark(args: str(list), self_rate: bool = True,settings: dict = {
     excel = ExcelOutput(groups, self_rate, lookup, settings["capped_mark"])
     settings["self_rate"] = self_rate
     student_mean, groups = process_students(groups, data, lookup, settings)
-    
+
     # Flag students that did not complete quiz while belonging to a group
     for i in groups["ID number"].tolist():
         if int(i) not in data['ID number'].tolist() and not groups["Group"][groups["ID number"] == i].isna().values[0] :
@@ -384,6 +379,7 @@ def mark(args: str(list), self_rate: bool = True,settings: dict = {
         group = groups[groups["Group"] == g]
         if group.empty:
             continue
+        print(group) #XXX
         size = int(group["Size"].values[0])
         team_mean[g] = student_mean[group["ID number"].tolist()].sum(axis=1) / size
     
@@ -396,18 +392,27 @@ def mark(args: str(list), self_rate: bool = True,settings: dict = {
             continue
         factor = np.minimum(student_mean[entry[1]["ID number"]].values[0] / team_mean[group].values[0], settings["capped_mark"])
         factors.append(factor.round(2))        
-        
+
     # Compiles and prints results
     compile_results(groups, factors, settings["create_file"])
     
 
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        mark(sys.argv[1:], self_rate=True)
+def run_cmd():
+    if len(sys.argv) > 2:
+        mark(sys.argv[2:], self_rate=True)
     else:
+        os.chdir("..")
+
+        # paths = [
+            # "files/groups.xlsx",
+            # "files/p1.csv",
+            # "output"
+        # ]
+
         paths = [
-            "files/groups.xlsx",
-            "files/p1.csv",
-            "output"
+            "~/PEP/output/calculated_group_allocations.xlsx",
+            "~/Downloads/2024-MT00548-Project 1 Chat peer rating-responses.csv",
+            "output"   
         ]
-        mark(paths, self_rate=False)
+
+        mark(paths, self_rate=True) 

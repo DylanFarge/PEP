@@ -6,11 +6,16 @@ class ExcelOutput:
         self.capped_mark = capped_mark
         self.lookup = lookup        
         self.self_rate = self_rate
-        self.df = pd.DataFrame(columns=["Ratings","Group"], index=groups["ID number"].tolist())
+        self.df = pd.DataFrame(columns=["Ratings","Comments","Group"], index=groups["ID number"].tolist())
+
+    def add_comment(self, rator, ratee, paragraph):
+        comment = self.df.loc[rator]
+        if type(comment["Comments"]) == dict:
+            self.df.loc[rator]["Comments"][str(ratee)] = paragraph
+        else:
+            self.df.loc[rator]["Comments"] = {str(ratee): paragraph}
 
     def add_rating(self, rator, ratee, symbol):
-        if rator == "22681167":
-            ...
         rating = self.df.loc[rator]
         if type(rating["Ratings"]) == dict:
             self.df.loc[rator]["Ratings"][str(ratee)] = symbol
@@ -96,7 +101,24 @@ class ExcelOutput:
                 cell_student = xl.utils.get_column_letter((m*2)+2) + str(i+6)
                 st.cell(row=(m+3), column=(k*2)+5, value="=MIN("+cell_student+"/"+cell_team+","+cap_cell+")").alignment = xl.styles.Alignment(horizontal="center")
                 st.merge_cells(start_row=(m+3), start_column=(k*2)+5, end_row=(m+3), end_column=(k*2)+6)
-                
+
+            # Dump comments
+            st.cell(row=i+6, column=(k*2) + 10, value="Comments").alignment = xl.styles.Alignment(horizontal="center")
+            st.merge_cells(start_row=i+6, start_column=(k*2) + 10, end_row=i+6, end_column=(k*2) + 11)
+            st.cell(row=i+7, column=(k*2) + 10, value="About").alignment = xl.styles.Alignment(horizontal="center")
+            st.cell(row=i+7, column=(k*2) + 11, value="From").alignment = xl.styles.Alignment(horizontal="center")
+            for about in range(len(members)):
+                st.cell(row=i+8+(about * (len(members)+1)), column=(k*2) + 10, value=str(members[about])).alignment = xl.styles.Alignment(horizontal="center", vertical="center") 
+                st.merge_cells(start_row=i+8+(about * (len(members)+1)), start_column=(k*2) + 10, end_row=i+8+((len(members)+1)*about)+(len(members)-1), end_column=(k*2) + 10)
+                for frm in range(len(members)):
+                    st.cell(row=i+8+((len(members)+1)*about) + frm, column=(k*2) + 11, value=str(members[frm])).alignment = xl.styles.Alignment(horizontal="center", vertical="center")
+                    if group[1][group[1]["ID number"] == str(members[frm])]["Flag"].values[0] == True:
+                        comment = "<Flagged Student>"        
+                        st.cell(row=i+8+((len(members)+1)*about) + frm, column=(k*2) + 12, value=comment).fill = xl.styles.PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+                    else:
+                        comment = self.df.loc[str(members[frm])]["Comments"][str(members[about])]
+                        st.cell(row=i+8+((len(members)+1)*about) + frm, column=(k*2) + 12, value=comment).alignment = xl.styles.Alignment(horizontal="left")
+
         # remove default sheet
         self.wb.remove(self.wb["Sheet"])
     
