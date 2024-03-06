@@ -94,7 +94,7 @@ class Application():
     app.columnconfigure(0, weight=1)
     app.columnconfigure(1, weight=3)
 
-    app.title("PRP: Peer Review Processor")
+    app.title("PEP: Peer Evaluation Program")
     app.configure(bg="white")
 
     frameREADME = tk.Frame(relief=tk.RAISED, borderwidth=1, bg="white", highlightbackground="#0AF", highlightthickness=2)
@@ -120,7 +120,7 @@ class Application():
     frameMain.columnconfigure(1, weight=1)
     frameMain.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
-    label = tk.Label(master=frameMain, text="PRP: Peer Review Processor", bg="white", font=get_fonts("heading"))
+    label = tk.Label(master=frameMain, text="PEP: Peer Evaluation Program", bg="white", font=get_fonts("heading"))
     label.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
 
     frame1 = tk.Frame(master=frameMain, relief=tk.RAISED, borderwidth=1, bg="white", highlightbackground="#0AF", highlightthickness=2)
