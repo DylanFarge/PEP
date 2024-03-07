@@ -13,6 +13,8 @@ python3 app.py
 4. ~~Add an Excel spreadsheet file as an output for all worded reviews in order to easily check for group member names and ratings.~~ &check;
 1. ~~If group file is absent, self-learn and associate members to groups based on peer review.~~ &check;
 3. Start/Expand/Finish README
+1. Check all given member ids before attempting to correct them (Potentially reducing flagged students).
+1. Record and display reason for flagging students.
 ---
 ## README TODO:
 1. How to use PEP software.
@@ -24,4 +26,5 @@ python3 app.py
 3. Format of group allocation file required for PEP if manual allocation is done.
 4. How to setup SUNLearn peer review quiz and how to export the resulting file.
 5. Format of peer review file required for PEP if manual peer review is done.
+1. Explain any misc functions and features, such as self-learning group allocation.
 ---

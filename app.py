@@ -3,6 +3,9 @@ import webbrowser
 import tkinter as tk
 from src.mark_ratings import mark
 from tkinter.filedialog import askopenfilename, askdirectory
+import sys
+from src.mark_ratings import run_cmd
+from src.self_learn_groups import learn_groups
 
 def select_file(excel_type):
     if excel_type == "xlsx":
@@ -72,7 +75,7 @@ def execute():
         except Exception as e:
             print(e)
             Application.btn4.config(bg="red")
-            Application.errorLabel = tk.Label(master=Application.frameMain, text="Something went wrong with processing the group allocation file and/or the peer review file. Please make sure the files are correct and try again.", bg="white", fg="red", wraplength=500)
+            Application.errorLabel = tk.Label(master=Application.frameMain, text="Something went wrong with processing the group allocation file and/or the peer review file. Please make sure the files are correct or that the column names are what is expected.", bg="white", fg="red", wraplength=500)
             Application.errorLabel.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
         finally:
             Application.btn4.config(state="normal")
@@ -176,12 +179,31 @@ class Application():
         Application.app.mainloop()
 
 if __name__ == "__main__":
-    import sys
-    from src.mark_ratings import run_cmd
+
     if len(sys.argv) > 1:
+
         if sys.argv[1] == "cmd":
             run_cmd()
+
+        elif sys.argv[1] == "run":
+            Application.run()
+
+        elif sys.argv[1] == "self-learn":
+            if len(sys.argv) > 2:
+                path = sys.argv[2]
+            else:
+                path = "~/PEP/files/p1/2024-MT00548-Project 1 Chat peer rating-responses.csv"
+            
+            learn_groups(path, to_file=True)
+
         else:
             print("Unknown command:", sys.argv[1])
     else:
-        Application.run()
+        spacing = 30
+        print("----------------------------------------------<<< PEP OPTIONS >>>----------------------------------------------")
+        print(f"{'run':>{spacing}} : Run the GUI.")
+        print(f"{'cmd':>{spacing}} : Run via the command line with hard-coded files and output directory.")
+        print(f"{'cmd <group> <ratings> <output>':>{spacing}} : Run the command line interface with the given files and output directory.")
+        print(f"{'self-learn':>{spacing}} : Run the self-learning groups function with hard-coded file and output directory.")
+        print(f"{'self-learn <ratings file>':>{spacing}} : Generates groups based off of peer evaluations' cross referencing. Outputs to 'output/'")
+        print("---------------------------------------------------------------------------------------------------------------")

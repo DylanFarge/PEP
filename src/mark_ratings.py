@@ -2,10 +2,11 @@ import os, sys
 import pandas as pd
 import numpy as np
 from src.output_excel import ExcelOutput
-# from output_excel import ExcelOutput
 
 open_log_file : bool = True
 outdir : str = "."
+SUNLEARN_LASTNAME = "Last name"
+# SUNLEARN_LASTNAME = "Surname"
 
 def out(message : str, type="string") :
     '''
@@ -160,7 +161,7 @@ def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, 
         group_size = group_size if settings["self_rate"] else group_size - 1
         group = group["Group"].values[0]
         
-        out("---------- Processing "+student+" "+entry[1]["Last name"]+" ----------")
+        out("---------- Processing "+student+" "+entry[1][SUNLEARN_LASTNAME]+" ----------")
         i = 0
         pending_scores = []
         pending_members = []
@@ -265,7 +266,7 @@ def compile_results(groups : pd.DataFrame, factors : list, create : bool):
     excel.save(groups, outdir+"/results.xlsx")
     results = pd.DataFrame({
         "First name": groups["First name"].tolist(),
-        "Last name": groups["Last name"].tolist(),
+        "Last name": groups[SUNLEARN_LASTNAME].tolist(),
         "ID number": groups["ID number"].tolist(),
         "Group": groups["Group"].tolist(),    
         "Scaling factor": factors,
@@ -284,9 +285,11 @@ def compile_results(groups : pd.DataFrame, factors : list, create : bool):
     out("--------------------------------------------")
     out(results[results["Flagged"] == "FLAGGED"], type="df")
     out("--------------------------------------------")
-    out("Divide by zero errors: (Did not include in final scores)")
-    out(errors, type="df")
-    out("--------------------------------------------")
+
+    if not errors.empty:
+        out("Divide by zero errors: (Did not include in final scores)")
+        out(errors, type="df")
+        out("--------------------------------------------")
     
     if create:
         if os.path.exists(f"{outdir}/scaling_factors.csv"):
@@ -401,17 +404,10 @@ def run_cmd():
     if len(sys.argv) > 2:
         mark(sys.argv[2:], self_rate=True)
     else:
-        os.chdir("..")
-
-        # paths = [
-            # "files/groups.xlsx",
-            # "files/p1.csv",
-            # "output"
-        # ]
 
         paths = [
-            "~/PEP/output/calculated_group_allocations.xlsx",
-            "~/Downloads/2024-MT00548-Project 1 Chat peer rating-responses.csv",
+            "~/PEP/files/p1/calculated_group_allocations.xlsx",
+            "~/PEP/files/p1/2024-MT00548-Project 1 Chat peer rating-responses.csv",
             "output"   
         ]
 

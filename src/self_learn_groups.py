@@ -104,6 +104,3 @@ def learn_groups(path, to_file):
         df["Group size"] = group_sizes
 
         df.to_excel("output/calculated_group_allocations.xlsx", index=False)
-
-if __name__ == '__main__':
-    learn_groups("~/PEP/2024-MT00548-Project 1 Chat peer rating-responses.csv", to_file=True) #XXX
