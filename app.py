@@ -115,7 +115,7 @@ class Application():
     btn_MARKDOWN = tk.Button(master=frameREADME, text="README.md", width=21, command=lambda: os.system("open README.md"), bg="#0BF", fg="white", activebackground="#0FF", font=get_fonts("subheading"))
     btn_MARKDOWN.grid(row=1, column=1, padx=10, pady=10)
 
-    btn_GITHUB = tk.Button(master=frameREADME, text="GitHub", width=21, command=lambda: webbrowser.open('https://github.com/DylanFarge/PRP'), bg="#0BF", fg="white", activebackground="#0FF", font=get_fonts("subheading"))
+    btn_GITHUB = tk.Button(master=frameREADME, text="GitHub", width=21, command=lambda: webbrowser.open('https://github.com/DylanFarge/PEP'), bg="#0BF", fg="white", activebackground="#0FF", font=get_fonts("subheading"))
     btn_GITHUB.grid(row=1, column=2, padx=10, pady=10)
 
     frameMain = tk.Frame(relief=tk.RAISED, borderwidth=1, bg="white", highlightbackground="#0AF", highlightthickness=2)

@@ -301,7 +301,7 @@ def compile_results(groups : pd.DataFrame, factors : list, create : bool):
             f.write(df.to_csv(index=False))
 
     
-def mark(args: str(list), self_rate: bool = True,settings: dict = {
+def mark(args, self_rate: bool = True,settings: dict = {
     "capped_mark": 1.1,
     "correct_ids": True,
     "create_file": True,
