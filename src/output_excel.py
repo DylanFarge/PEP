@@ -22,7 +22,7 @@ class ExcelOutput:
         else:
             self.df.loc[rator]["Ratings"] = {str(ratee): symbol}
                                 
-    def _generate_excel_workbook(self, groups):
+    def _generate_excel_workbook(self, groups, SUNLEARN_GROUP):
 
         def lookup_func(cell):
             string = "="
@@ -35,7 +35,7 @@ class ExcelOutput:
     
         self.wb = xl.Workbook()
 
-        for group in groups.groupby("Group"):
+        for group in groups.groupby(SUNLEARN_GROUP):
             st = self.wb.create_sheet(group[0])
             members = sorted(group[1]["ID number"].astype(int).tolist())
             
@@ -122,6 +122,6 @@ class ExcelOutput:
         # remove default sheet
         self.wb.remove(self.wb["Sheet"])
     
-    def save(self, groups, dir):
-        self._generate_excel_workbook(groups)
+    def save(self, groups, SUNLEARN_GROUP ,dir):
+        self._generate_excel_workbook(groups, SUNLEARN_GROUP)
         self.wb.save(dir)

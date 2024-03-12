@@ -15,6 +15,7 @@ python3 app.py
 3. Start/Expand/Finish README
 1. Check all given member ids before attempting to correct them (Potentially reducing flagged students).
 1. Record and display reason for flagging students.
+1. Map Column names in GUI.
 ---
 ## README TODO:
 1. How to use PEP software.

@@ -3,10 +3,13 @@ import pandas as pd
 import numpy as np
 from src.output_excel import ExcelOutput
 
-open_log_file : bool = True
-outdir : str = "."
 SUNLEARN_LASTNAME = "Last name"
 # SUNLEARN_LASTNAME = "Surname"
+# SUNLEARN_GROUP = "Groups"
+SUNLEARN_GROUP = "Group"
+
+open_log_file : bool = True
+outdir : str = "."
 
 def out(message : str, type="string") :
     '''
@@ -78,7 +81,7 @@ def get_groups(path : str) -> pd.DataFrame:
     except Exception as e:
         print(e)
         raise IOError("Could not find file: "+path+"\n Please make sure that the file path exists and correct.")
-    groups['Size'] = groups.groupby('Group')['Group'].transform('count')
+    groups['Size'] = groups.groupby(SUNLEARN_GROUP)[SUNLEARN_GROUP].transform('count')
     # make sure that the ids are all strings and not given as integers
     groups["ID number"] = list(map(str,groups["ID number"].to_list()))
     groups['Flag'] = False
@@ -159,7 +162,7 @@ def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, 
         group = groups[groups["ID number"] == student]
         group_size = int(group["Size"].values[0])
         group_size = group_size if settings["self_rate"] else group_size - 1
-        group = group["Group"].values[0]
+        group = group[SUNLEARN_GROUP].values[0]
         
         out("---------- Processing "+student+" "+entry[1][SUNLEARN_LASTNAME]+" ----------")
         i = 0
@@ -174,7 +177,7 @@ def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, 
                 member = str(entry[1]["Response "+str(3*(i+j)+1)]).split(".")[0]
                 rating = str(entry[1]["Response " + str(3*(i+j)+2)])
                 comment = str(entry[1]["Response " + str(3*(i+j)+3)])
-                member_group = groups[groups["ID number"] == member]["Group"]
+                member_group = groups[groups["ID number"] == member][SUNLEARN_GROUP]
                 
                 if member == student and not settings["self_rate"] and member not in pending_members:
                     pending_members.append(member)
@@ -218,7 +221,7 @@ def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, 
                     i = group_size
 
                 elif correct_ids and not duplicate:
-                    correction = try_to_correct(member, groups[groups["Group"] == group]["ID number"].tolist())
+                    correction = try_to_correct(member, groups[groups[SUNLEARN_GROUP] == group]["ID number"].tolist())
                     
                     if correction is None:
                         groups.loc[groups["ID number"] == student, "Flag"] = True
@@ -263,12 +266,12 @@ def compile_results(groups : pd.DataFrame, factors : list, create : bool):
     None
     '''
     global outdir, excel
-    excel.save(groups, outdir+"/results.xlsx")
+    excel.save(groups, SUNLEARN_GROUP, outdir+"/results.xlsx")
     results = pd.DataFrame({
         "First name": groups["First name"].tolist(),
         "Last name": groups[SUNLEARN_LASTNAME].tolist(),
         "ID number": groups["ID number"].tolist(),
-        "Group": groups["Group"].tolist(),    
+        "Group": groups[SUNLEARN_GROUP].tolist(),    
         "Scaling factor": factors,
         "Flagged": ["" if i == False else "FLAGGED" for i in groups["Flag"].tolist()],
     })
@@ -361,14 +364,14 @@ def mark(args, self_rate: bool = True,settings: dict = {
 
     # Flag students that did not complete quiz while belonging to a group
     for i in groups["ID number"].tolist():
-        if int(i) not in data['ID number'].tolist() and not groups["Group"][groups["ID number"] == i].isna().values[0] :
+        if int(i) not in data['ID number'].tolist() and not groups[SUNLEARN_GROUP][groups["ID number"] == i].isna().values[0] :
             groups.loc[groups["ID number"] == i, "Flag"] = True
     
     # Assign 0 to flagged students and 100 to members in the same group
     flagged_students = groups[groups["Flag"] == True]
     for entry in flagged_students.iterrows():
-        group = entry[1]["Group"]
-        group_members = groups[groups["Group"] == group]["ID number"].tolist()
+        group = entry[1][SUNLEARN_GROUP]
+        group_members = groups[groups[SUNLEARN_GROUP] == group]["ID number"].tolist()
         for i in group_members:
             if i == entry[1]["ID number"]:
                 student_mean[i] += 0
@@ -376,10 +379,10 @@ def mark(args, self_rate: bool = True,settings: dict = {
                 student_mean[i] += (100 / len(group_members))
 
     # Calculate team means
-    group_names = groups["Group"].unique().tolist()
+    group_names = groups[SUNLEARN_GROUP].unique().tolist()
     team_mean = pd.DataFrame(np.zeros((1, len(group_names))), columns=group_names)
     for g in group_names:
-        group = groups[groups["Group"] == g]
+        group = groups[groups[SUNLEARN_GROUP] == g]
         if group.empty:
             continue
         print(group) #XXX
@@ -389,7 +392,7 @@ def mark(args, self_rate: bool = True,settings: dict = {
     # Calculate scaling factor
     factors = []
     for entry in groups.iterrows():
-        group = entry[1]["Group"]
+        group = entry[1][SUNLEARN_GROUP]
         if team_mean[group].values[0] == 0:
             factors.append(-1)
             continue
@@ -405,9 +408,15 @@ def run_cmd():
         mark(sys.argv[2:], self_rate=True)
     else:
 
+        # paths = [
+        #     "~/PEP/files/p1/calculated_group_allocations.xlsx",
+        #     "~/PEP/files/p1/2024-MT00548-Project 1 Chat peer rating-responses.csv",
+        #     "output"   
+        # ]
+
         paths = [
-            "~/PEP/files/p1/calculated_group_allocations.xlsx",
-            "~/PEP/files/p1/2024-MT00548-Project 1 Chat peer rating-responses.csv",
+            "~/PEP/files/CnS/courseid_89421_participants.xlsx",
+            "~/PEP/files/CnS/2024-14533-771-Peer Evaluation v0-responses.csv",
             "output"   
         ]
 
