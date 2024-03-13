@@ -3,8 +3,8 @@ import pandas as pd
 import numpy as np
 from src.output_excel import ExcelOutput
 
-SUNLEARN_LASTNAME = "Last name"
-# SUNLEARN_LASTNAME = "Surname"
+# SUNLEARN_LASTNAME = "Last name"
+SUNLEARN_LASTNAME = "Surname"
 # SUNLEARN_GROUP = "Groups"
 SUNLEARN_GROUP = "Group"
 

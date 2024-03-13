@@ -13,7 +13,7 @@ python3 app.py
 4. ~~Add an Excel spreadsheet file as an output for all worded reviews in order to easily check for group member names and ratings.~~ &check;
 1. ~~If group file is absent, self-learn and associate members to groups based on peer review.~~ &check;
 3. Start/Expand/Finish README
-1. Check all given member ids before attempting to correct them (Potentially reducing flagged students).
+1. Check all given member ids before attempting to correct them (Potentially reducing initially flagged students).
 1. Record and display reason for flagging students.
 1. Map Column names in GUI.
 1. Sunlearn was updated: Change group file support from xlsx to csv.
