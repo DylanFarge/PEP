@@ -16,6 +16,7 @@ python3 app.py
 1. Check all given member ids before attempting to correct them (Potentially reducing flagged students).
 1. Record and display reason for flagging students.
 1. Map Column names in GUI.
+1. Sunlearn was updated: Change group file support from xlsx to csv.
 ---
 ## README TODO:
 1. How to use PEP software.
