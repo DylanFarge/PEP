@@ -1,10 +1,50 @@
 # Peer Evaluation Program (PEP)
-## `How To Run PEP` 
+## `Before you begin`
+This program requires two dependencies that are freely and easily available to download through the terminal. The following commands will create the environment and install the dependencies on a Linux system. Just follow the relevant commands for your Operating system.
 
-To use, please activate the virtual environment by running the following command:
+### Installing Dependencies
 ```bash
-source venv/bin/activate
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get install python3 -y
+sudo apt-get install python3-pip -y
 ```
+Note that if you want to run the GUI, your python installation should have it already installed. If not you will need to install `python3-tk` as well, and might need to check your _td/tk_ packages.
+
+Now you can go ahead and install the required python packages through pip:
+```bash
+pip3 install -r src/dependencies.txt
+```
+This _dependencies.txt_ file contains the two dependencies required: `pandas` and `openpyxl`.
+
+Assuming your working directory is the root of the project PEP, you can now go ahead and run the program.
+
+### Getting the Relevant Files from SUNLearn
+You will need two files from SUNLearn to run PEP:
+1. The file mapping students to groups.
+2. The file containing the peer review responses.
+
+#### Getting the Group File
+Go to the participants tab on sunlearn and scroll to the bottom. Click on the `Select all <#> students` button and specifically select the `xlsx` option for download. The reason for this file format is due to it being the only download option at the start of the project. Future plans are to support `csv` files as well.
+
+<img src="SUNLearnImages/4.png" alt="Select all students" width="300"/>
+
+#### Getting the Peer Review File
+Go to the online quiz that was used for the peer review. 
+
+<img src="SUNLearnImages/1.png" alt="Select all students" width="300"/>
+
+Then navigate to the `Responses`.
+
+<img src="SUNLearnImages/2.png" alt="Select all students" width="500"/>
+
+Finally, click on the download button for specifically the `CSV` format.
+
+<img src="SUNLearnImages/3.png" alt="Select all students" width="500"/>
+
+And now you should have the two files needed to run PEP. Please note that the group file has the `xlsx` extension and the peer review file has the `csv` extension.
+ 
+## `How To Run PEP` 
 There are two interactive mode to use PEP:
 - Graphical User Interface (GUI)
 - Command Line Interface (CLI)
@@ -61,4 +101,5 @@ If you encounter an error message (displayed in the terminal) that indicates tha
 1. Sunlearn was updated: Change group file support from xlsx to csv.
 1. Add a config file for CLI usage.
 1. Perhaps move GUI from Tkinter to Plotly Dash due to better support for data visualization and version control.
+1. Add a field to ignore certain groups (such as Admin, as to not bloat the output file).
 ---

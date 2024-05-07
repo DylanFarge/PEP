@@ -3,10 +3,10 @@ import pandas as pd
 import numpy as np
 from src.output_excel import ExcelOutput
 
-# SUNLEARN_LASTNAME = "Last name"
-SUNLEARN_LASTNAME = "Surname"
-# SUNLEARN_GROUP = "Groups"
-SUNLEARN_GROUP = "Group"
+SUNLEARN_LASTNAME = "Last name"
+# SUNLEARN_LASTNAME = "Surname"
+SUNLEARN_GROUP = "Groups"
+# SUNLEARN_GROUP = "Group"
 
 open_log_file : bool = True
 outdir : str = "."
@@ -415,9 +415,11 @@ def run_cmd():
         # ]
 
         paths = [
-            "~/PEP/files/CnS/courseid_89421_participants.xlsx",
-            "~/PEP/files/CnS/2024-14533-771-Peer Evaluation v0-responses.csv",
+            "./files/CnS/courseid_89421_participants.xlsx",
+            "./files/CnS/2024-14533-771-Peer Evaluation v0-responses.csv",
             "output"   
         ]
 
         mark(paths, self_rate=True) 
+
+    print("---PEP CALCULATIONS COMPLETE. PLEASE CHECK THE OUTPUT FILE FOR RESULTS---")  
