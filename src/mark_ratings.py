@@ -175,6 +175,7 @@ def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, 
             try:
                     
                 member = str(entry[1]["Response "+str(3*(i+j)+1)]).split(".")[0]
+                int(member) # This is a type cast to see if the member is indeed inputed as a number.
                 rating = str(entry[1]["Response " + str(3*(i+j)+2)])
                 comment = str(entry[1]["Response " + str(3*(i+j)+3)])
                 member_group = groups[groups["ID number"] == member][SUNLEARN_GROUP]
