@@ -160,8 +160,14 @@ def process_students(groups : pd.DataFrame, data : pd.DataFrame, lookup : dict, 
     for entry in data.iterrows():
         student = str(entry[1]["ID number"])
         group = groups[groups["ID number"] == student]
-        group_size = int(group["Size"].values[0])
+        print(group["Size"].values[0])
+        print(type(group["Size"].values[0]))
+        try:
+            group_size = int(group["Size"].values[0])
+        except:
+            group_size = 0
         group_size = group_size if settings["self_rate"] else group_size - 1
+        group_size = group_size if group_size > 0 else 0
         group = group[SUNLEARN_GROUP].values[0]
         
         out("---------- Processing "+student+" "+entry[1][SUNLEARN_LASTNAME]+" ----------")

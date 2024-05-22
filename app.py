@@ -73,7 +73,9 @@ def execute():
         except AttributeError as e:
             print(e)
         except Exception as e:
+            print("-----------------------")    
             print(e)
+            print("-----------------------")
             Application.btn4.config(bg="red")
             Application.errorLabel = tk.Label(master=Application.frameMain, text="Something went wrong with processing the group allocation file and/or the peer review file. Please make sure the files are correct or that the column names are what is expected.", bg="white", fg="red", wraplength=500)
             Application.errorLabel.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
